@@ -1,0 +1,3 @@
+what should code do after excution completed ?
+it will mail me with passed cases number, failed cases and cases file with changed the test case status. 
+it will attach test case file, log file and screenshots of failed test cases
