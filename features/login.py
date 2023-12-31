@@ -87,8 +87,8 @@ class setup:
         # this is for armember registration check and setup check using bank
         # transport and paypal method but as of now i cann't check the paypal in local so only bank transfer
         before_cookies = drivers.get_cookies()
-        def register(data,before_cookies=before_cookies):
-            drivers.get(url+"/register")
+        def register(data,called_by,before_cookies=before_cookies):
+            drivers.get(url+"/" +data["end_point"])
             username_value = data["username"]
             firstname_value = data["first_name"]
             lastname_value = data["lastname_name"]
@@ -124,20 +124,53 @@ class setup:
                     elif "email" in validation[1].text :
                         print("the used email is already exist")
                         drivers.quit()
-            else:
+            elif called_by==0:
                 submit_form = findelement(drivers,locator[5],locatorpath[5],action[5])
-            time.sleep(10)
-            drivers.refresh()
-            time.sleep(1)
-            after_cookies = drivers.get_cookies()
-            # check the redirection validation
-            redirection = validate.redirection_validation(redirection_url)
-            if redirection[0] == 1:
-                print("redirected to " + redirection_url + " which is working properly")
-            elif redirection[0] ==0:
-                print("redirection is not working proeprly, it redirected to " + redirection[1] + " and which is not same as the expected url " + redirection_url)
-            return before_cookies,after_cookies
+                time.sleep(10)
+                drivers.refresh()
+                time.sleep(1)
+                after_cookies = drivers.get_cookies()
+                # check the redirection validation
+                redirection = validate.redirection_validation(redirection_url)
+                if redirection[0] == 1:
+                    print("redirected to " + redirection_url + " which is working properly")
+                elif redirection[0] ==0:
+                    print("redirection is not working proeprly, it redirected to " + redirection[1] + " and which is not same as the expected url " + redirection_url)
+                return before_cookies,after_cookies
+            elif called_by==1:
+                return locator[5],locatorpath[5],action[5]
+            
         
+        def setup_with_new(data):
+            # devide it in three parts first select plan, 
+            # then fill the form, 
+            # select payment gateways and fill the details 
+            # for form we can user above the fuction as it is except submit button
+            trasaction_id = data["tr_id"]
+            bank_name = data['bankname']
+            holdername = data['holdername']
+            note = data['note']
+            plan_locator = data['plan_locator']
+            bank_locator = data["bank_locator"]
+            bank_identified = data["bank_identified"]
+            called_by = 1
+            submitbtn = "ARMSETUPSUBMIT"
+            first_setp = setup.register(data,called_by)
+            
+            time.sleep(2)
+            # drivers.get(url+"/" +data["end_point"])
+            # selectplan = findelement(drivers,plan_locator[0],plan_locator[1],plan_locator[2])
+            tr_id_add =findelement(drivers,bank_identified[0],bank_locator[0],"send_keys",trasaction_id)
+            bank_name_add =findelement(drivers,bank_identified[1],bank_locator[1],"send_keys",bank_name)
+            account_name_add =findelement(drivers,bank_identified[2],bank_locator[2],"send_keys",holdername)
+            note_add =findelement(drivers,bank_identified[3],bank_locator[3],"send_keys",note)
+            # add bank details
+            time.sleep(5)
+            submit_form = findelement(drivers,"NAME",submitbtn,"click")
+            
+            time.sleep(100)
+            pass
+            
         
     
     
@@ -203,19 +236,28 @@ class validate:
 # login_arm = login.login_with_armember(data1)
 # validate.verifyuser(login_arm,data)
 register_data = {
-    "username": "armember14",
-    "first_name" :"armember14",
-    "lastname_name" : "armember14",
-    "user_email":"armember14@gmail.com",
-    "user_pass":"armember14",
+    "username": "armember17",
+    "first_name" :"armember17",
+    "lastname_name" : "armember17",
+    "user_email":"armember17@gmail.com",
+    "user_pass":"armember17",
     "error" : "arm-df__fc--validation__wrap",
     "locator": ["NAME","NAME","NAME","NAME","NAME","NAME"],
     "locatorpath":["user_login","first_name","last_name","user_email","user_pass","armFormSubmitBtn"],
     "action":["send_keys","send_keys","send_keys","send_keys","send_keys","click"],
     "redirect_url" : "http://localhost/test_lite1/edit_profile/",
-    "check_validation":0
-}
-register = setup.register(register_data)
-print(register)
-validate.verifyuser(register[1],register_data)
+    "check_validation":0,
+    "holdername":"test",
+    "bankname":"test",
+    "tr_id":"test",
+    "note":"this is for testing purposes only",
+    "plan_locator": ["id","arm_subscription_plan_option_2","click"],
+    "bank_locator": ["bank_transfer[transaction_id]","bank_transfer[bank_name]","bank_transfer[account_name]","bank_transfer[additional_info]" ],
+    "bank_identified":["name","name","name","name"],
+    "end_point":"setup"
+} 
+# register = setup.register(register_data,0)
+signup = setup.setup_with_new(register_data)
+print(signup)
+validate.verifyuser(signup[1],register_data)
 drivers.quit()
