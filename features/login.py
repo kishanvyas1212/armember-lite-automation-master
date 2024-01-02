@@ -1,3 +1,4 @@
+import features
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 from selenium.webdriver.support import expected_conditions as ec
@@ -7,6 +8,8 @@ from selenium.webdriver.chrome.service import Service   #This is selenium 4 new 
 # from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from features.get_element import get_element as ge
+from features.payment_gateways import payment_gateways as pw
 
 from selenium.webdriver.common.by import By
 ser_Obj = Service("C:\\Users\\91635\\Desktop\\drivers\\chromedriver.exe")
@@ -14,66 +17,24 @@ ser_Obj = Service("C:\\Users\\91635\\Desktop\\drivers\\chromedriver.exe")
 drivers = webdriver.Chrome(service= ser_Obj)
 drivers.implicitly_wait(60)
 url = "http://localhost/test_lite1"
-def wait_for_element_present(locator, timeout=2):
-    try: 
-        # try to find the element is located or not, if not then return None
-        WebDriverWait(drivers, timeout).until(EC.presence_of_element_located((By.CLASS_NAME,locator)))
-            
-    except:
-        pass
-    return 
-def wait_for_element_display(driver, locator, timeout=10):
-    return WebDriverWait(drivers, timeout).until(EC.visibility_of_element_located((By.CLASS_NAME,locator)))
-    # print(locator)
-    # return drivers.find_elements(By.CLASS_NAME,locator)
-# locator = (By.XPATH,"test") pass the locator in this way for wait for element 
 
-def action_perform(element, action,value):
-    if action=='click':
-        element.click()
-    elif action=="send_keys":
-        element.send_keys(value)
-    return
-    
-    
-def findelement(driver, locator,locatorpath,action=1,value=1):
-    try:
-        if locator=="ID" or locator=="id":
-            element = driver.find_element(By.ID, locatorpath )
-            if action!="" or action!="1" or action=="click" or action=="send_keys":
-                action_perform(element,action,value)
-            return element
-        elif locator=="XPATH" or locator=="xpath":
-            element = driver.find_element(By.XPATH,locatorpath)
-            if action!="" or action!="1" or action=="click" or action=="send_keys":
-                action_perform(element,action,value)
-            return element
-        elif locator=="name" or locator=="NAME":
-            element = driver.find_element(By.NAME,locatorpath)
-            if action!="" or action!="1" or action=="click" or action=="send_keys":    
-                action_perform(element,action,value)
-            return element
-    except Exception as e:
-        print("Element is not found so please retry to move to next case")
-        drivers.save_screenshot("screenshots/" + str(value) +".png")
-        drivers.quit()
               
 class login:
     def login_with_wordpress(data):
         drivers.get(url + data["end_point"])
-        usernamef = findelement(drivers,"ID","user_login","send_keys",data["username"])
-        pwd = findelement(drivers,"ID","user_pass","send_keys",data["password"])
+        usernamef = ge.findelement(drivers,"ID","user_login","send_keys",data["username"])
+        pwd = ge.findelement(drivers,"ID","user_pass","send_keys",data["password"])
         beforelogin = drivers.get_cookies()
-        login = findelement(drivers,"NAME","wp-submit","click")
+        login = ge.findelement(drivers,"NAME","wp-submit","click")
         usercookies = drivers.get_cookies()
         drivers.delete_all_cookies()
         return usercookies
     def login_with_armember(data):
         drivers.get(url + data["end_point"])
-        usernamef = findelement(drivers,"NAME","user_login","send_keys",data["username"]) 
-        pwd = findelement(drivers,"NAME","user_pass","send_keys",data["password"])   
+        usernamef = ge.findelement(drivers,"NAME","user_login","send_keys",data["username"]) 
+        pwd = ge.findelement(drivers,"NAME","user_pass","send_keys",data["password"])   
         beforelogin = drivers.get_cookies()
-        login = findelement(drivers,"NAME","armFormSubmitBtn","click")
+        login = ge.findelement(drivers,"NAME","armFormSubmitBtn","click")
         time.sleep(2)
         drivers.refresh()
         time.sleep(2)
@@ -106,16 +67,16 @@ class setup:
             #     time.sleep(1)
             #     if i == (i-1):
             #         validate.registerformverification(username_value,user_email_value,error_locator)
-            usernameadd = findelement(drivers,locator[0],locatorpath[0],action[0],username_value)
-            first_name = findelement(drivers,locator[1],locatorpath[1],action[1],firstname_value)
-            lastname_add = findelement(drivers,locator[2],locatorpath[2],action[2],lastname_value)
-            email_add = findelement(drivers,locator[3],locatorpath[3],action[3],user_email_value)
-            pass_add = findelement(drivers,locator[4],locatorpath[4],action[4],user_pass_pwd)
+            usernameadd = ge.findelement(drivers,locator[0],locatorpath[0],action[0],username_value)
+            first_name = ge.findelement(drivers,locator[1],locatorpath[1],action[1],firstname_value)
+            lastname_add = ge.findelement(drivers,locator[2],locatorpath[2],action[2],lastname_value)
+            email_add = ge.findelement(drivers,locator[3],locatorpath[3],action[3],user_email_value)
+            pass_add = ge.findelement(drivers,locator[4],locatorpath[4],action[4],user_pass_pwd)
             time.sleep(1)
             if check_validation == 1:
                 validation = validate.registerformverification(username_value,user_email_value,error_locator)
                 if validation[0] == 0:
-                    submit_form = findelement(drivers,locator[5],locatorpath[5],action[5])
+                    submit_form = ge.findelement(drivers,locator[5],locatorpath[5],action[5])
                 else:
                     print("add error handling, if use the csv or spread sheet to move forward then add the required code")
                     if "username" in validation[1].text:
@@ -125,7 +86,7 @@ class setup:
                         print("the used email is already exist")
                         drivers.quit()
             elif called_by==0:
-                submit_form = findelement(drivers,locator[5],locatorpath[5],action[5])
+                submit_form = ge.findelement(drivers,locator[5],locatorpath[5],action[5])
                 time.sleep(10)
                 drivers.refresh()
                 time.sleep(1)
@@ -146,27 +107,18 @@ class setup:
             # then fill the form, 
             # select payment gateways and fill the details 
             # for form we can user above the fuction as it is except submit button
-            trasaction_id = data["tr_id"]
-            bank_name = data['bankname']
-            holdername = data['holdername']
-            note = data['note']
-            plan_locator = data['plan_locator']
-            bank_locator = data["bank_locator"]
-            bank_identified = data["bank_identified"]
+
             called_by = 1
             submitbtn = "ARMSETUPSUBMIT"
             first_setp = setup.register(data,called_by)
-            
+            pw.bank_transfer(drivers,data)
             time.sleep(2)
             # drivers.get(url+"/" +data["end_point"])
             # selectplan = findelement(drivers,plan_locator[0],plan_locator[1],plan_locator[2])
-            tr_id_add =findelement(drivers,bank_identified[0],bank_locator[0],"send_keys",trasaction_id)
-            bank_name_add =findelement(drivers,bank_identified[1],bank_locator[1],"send_keys",bank_name)
-            account_name_add =findelement(drivers,bank_identified[2],bank_locator[2],"send_keys",holdername)
-            note_add =findelement(drivers,bank_identified[3],bank_locator[3],"send_keys",note)
+            
             # add bank details
             time.sleep(5)
-            submit_form = findelement(drivers,"NAME",submitbtn,"click")
+            submit_form = ge.findelement(drivers,"NAME",submitbtn,"click")
             
             time.sleep(100)
             pass
@@ -188,7 +140,7 @@ class validate:
                 print(data["username"])
                 print(cookie_value)
         else:
-            error = wait_for_element_display(drivers,(By.CLASS_NAME,"arm-df__fc--validation__wrap"))
+            error = ge.wait_for_element_display(drivers,(By.CLASS_NAME,"arm-df__fc--validation__wrap"))
             print("test case is passed ")
             print(error)
     def registerformverification(username_value,user_email,locator):
@@ -197,7 +149,7 @@ class validate:
         # below code to check the error message
         print(locator + "1")
         try: 
-            error_msg =  wait_for_element_display(drivers,locator)
+            error_msg =  ge.wait_for_element_display(drivers,locator)
             # print(type(error_msg))
             # print(error_msg)
         
